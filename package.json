@@ -9,6 +9,8 @@
   "author": "Pablo Tissera",
   "license": "MIT",
   "dependencies": {
+    "moment": "^2.29.1",
+    "moment-timezone": "^0.5.33",
     "mysql": "^2.18.1",
     "nodemailer": "^6.5.0"
   }

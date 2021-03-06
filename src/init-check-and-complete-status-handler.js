@@ -1,5 +1,7 @@
 'use strict';
 
+const moment = require("moment");
+
 const SQL_GET_POSTMETA = `SELECT *
     FROM wp0g_postmeta
     WHERE meta_key='notify_when_reaches_min'
@@ -66,14 +68,30 @@ const loadPostMeta = async (query, metaData) => {
         if (mapPostMeta[item.tour_id]) {
             metaData[key].notify_when_reaches_min = mapPostMeta[item.tour_id].notify_when_reaches_min;
             metaData[key].email_guide = mapPostMeta[item.tour_id].email_guide;
+            metaData[key].current_time = new Date();
+            metaData[key].tour_start_time = new Date(`${metaData[key].travel_date_key} ${getTourHour(metaData[key], mapPostMeta)}:00`)
         }
     });
 };
+
+const getTourHour = (item, mapPostMeta) => {
+    const element = mapPostMeta[item.tour_id];    
+    if (element) {
+        const key = `${element.tour_id}_${element.travel_date_key}`;
+        if (element.startTimes[key]) {
+            return element.startTimes[key];
+        } else if (element.startTimes[element.tour_id]) {
+            return element.startTimes[element.tour_id];
+        }
+    }
+    return '10:00';
+}
 
 const fillStartTime = (mapPostMeta) => {
     const keys = Object.keys(mapPostMeta);
     keys.forEach(key => {
         mapPostMeta[key].startTimes = parseStartTime(key, mapPostMeta[key].tourmaster_tour_option);
+        delete mapPostMeta[key].tourmaster_tour_option;
     });
 };
 
@@ -84,7 +102,6 @@ const parseStartTime = (tour_id, options) => {
     let tour_date = '';
     let tour_start_time = '';
     let startTimes = {};
-    let i = 0;
     if (options.indexOf(TOKEN_DATE_EXIST) > -1) {
         while(options.indexOf(TOKEN_DATE_EXIST) > -1) {
             options = options.substring(options.indexOf(TOKEN_DATE_EXIST) + TOKEN_DATE_EXIST.length)        
@@ -126,7 +143,7 @@ const initCheckAndCompleteStatusHandler = {
         await loadCurrentOrders(query, metaData);
         await loadPostMeta(query, metaData);
         await loadNotificationStatus(query, metaData);
-        //console.log(metaData);
+        console.log(metaData);
     }
 };
 
