@@ -48,6 +48,10 @@ const loadCurrentOrders = async (query, metaData ) => {
                 notify_1: false,
                 notify_24: false,
                 notify_48: false,
+                send_notify_min: false,
+                send_notify_1: false,
+                send_notify_24: false,
+                send_notify_48: false,
                 total_travelers_no_children: 0,
                 total_travelers: 0
 
@@ -135,14 +139,16 @@ const parseStartTime = (tour_id, options) => {
 
 const loadNotificationStatus = async(query, metaData) => {
     const result = await query(SQL_GET_NOTIFICATION_STATUS);
-    result.forEach(({tour_id, travel_date_key, id, notify_min, notify_1, notify_24, notify_48}) => {
+    result.forEach(({tour_id, travel_date_key, id, notify_min, notify_1, notify_24, notify_48, total_travelers_no_children, total_travelers}) => {
         const key = `${tour_id}_${travel_date_key}`;
-        metaData[key].nuevo = false,
-        metaData[key].status_id = id,
+        metaData[key].nuevo = false;
+        metaData[key].status_id = id;
         metaData[key].notify_min = notify_min;
         metaData[key].notify_1 = notify_1;
         metaData[key].notify_24 = notify_24;
         metaData[key].notify_48 = notify_48;
+        metaData[key].total_travelers_no_children = total_travelers_no_children;
+        metaData[key].total_travelers = total_travelers;
     });
 };
 
