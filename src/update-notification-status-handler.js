@@ -5,7 +5,7 @@ const update = async(query, metaData) => {
     keys.forEach(async (key) => {
       let travelers_no_children = 0;
       let travelers = 0;
-      metaData[key].booking.forEach(book => {
+      metaData[key].bookings.forEach(book => {
           travelers += book.traveller_first_name.length;
           travelers_no_children += book.traveller_first_name.length;
           if (book['tour-children'].length > 0) {

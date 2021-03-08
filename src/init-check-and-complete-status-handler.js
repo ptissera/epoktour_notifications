@@ -39,7 +39,7 @@ const loadCurrentOrders = async (query, metaData ) => {
                 travel_date,
                 travel_date_key,
                 package_group_slug,
-                booking: [],
+                bookings: [],
                 notify_when_reaches_min: 3,
                 email_guide: 'maira@pardigital.com.ar',
                 nuevo: true,
@@ -57,7 +57,7 @@ const loadCurrentOrders = async (query, metaData ) => {
 
             };
         }
-        metaData[key].booking.push(JSON.parse(booking_detail));
+        metaData[key].bookings.push(JSON.parse(booking_detail));
     });
 };
 

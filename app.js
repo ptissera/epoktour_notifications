@@ -4,6 +4,7 @@ var nodemailer = require('nodemailer');
 const { initCheckAndCompleteStatusHandler } = require('./src/init-check-and-complete-status-handler');
 const { validateNotificationsHandler } = require('./src/validate-notifications-handler');
 const { updateNotificationStatusHandler } = require('./src/update-notification-status-handler');
+const { emailHandler } = require('./src/email-handler');
 
 var conn = mysql.createConnection({
   host: "localhost",
@@ -24,7 +25,8 @@ const runCheckAndNotifications = async() => {
       validateNotificationsHandler.check24HourBookingReached(metaData);
       validateNotificationsHandler.check48HourBookingReached(metaData);
       updateNotificationStatusHandler.update(query, metaData);
-      logMetaData(metaData);
+      emailHandler.senddToNotifyMinTravelers(metaData);
+  //    logMetaData(metaData);
       try {  
         conn.end();
       } catch(err) {

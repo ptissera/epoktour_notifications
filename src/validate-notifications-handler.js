@@ -1,7 +1,5 @@
 'use strict';
 
-const moment = require("moment");
-
 const MIN_1_HOUR = 3240000;
 const MAX_1_HOUR = 3960000;
 const MIN_24_HOUR = 86040000;
@@ -14,10 +12,10 @@ const checkMinBookingReached = (metaData) => {
     keys.forEach(key => {
         if(!metaData[key].notify_min) {
             let travelers = 0;
-            metaData[key].booking.forEach(book => {
+            metaData[key].bookings.forEach(book => {
                 travelers += book.traveller_first_name.length;
                 if (book['tour-children'].length > 0) {
-                    travelers = travelers - parseInt(book['tour-children']);
+                  travelers = travelers - parseInt(book['tour-children']);
                 }
             });
             metaData[key].send_notify_min = metaData[key].notify_when_reaches_min <= travelers;
@@ -31,7 +29,7 @@ const check1HourBookingReached = (metaData) => {
     keys.forEach(key => {
         if(!metaData[key].notify_1 && MIN_1_HOUR <= metaData[key].diff_time && metaData[key].diff_time <= MAX_1_HOUR) {
             let travelers = 0;
-            metaData[key].booking.forEach(book => {
+            metaData[key].bookings.forEach(book => {
                 travelers += book.traveller_first_name.length;
             });
             metaData[key].send_notify_1 = metaData[key].total_travelers != travelers;
@@ -56,7 +54,7 @@ const check48HourBookingReached = (metaData) => {
     keys.forEach(key => {
         if(!metaData[key].notify_48 && MIN_48_HOUR <= metaData[key].diff_time && metaData[key].diff_time <= MAX_48_HOUR) {
             let travelers = 0;
-            metaData[key].booking.forEach(book => {
+            metaData[key].bookings.forEach(book => {
                 travelers += book.traveller_first_name.length;
                 if (book['tour-children'].length > 0) {
                     travelers = travelers - parseInt(book['tour-children']);
