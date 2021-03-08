@@ -17,6 +17,17 @@ const SQL_GET_CURRENT_ORDERS = `SELECT tour_id, travel_date, date_format(travel_
 const SQL_GET_NOTIFICATION_STATUS = `SELECT *, date_format(travel_date, '%Y-%m-%d') travel_date_key FROM wp0g_pg_notification_status
     WHERE travel_date >= now()`;
 
+const TOKEN_DATE_EXIST = '"date";s:10:"';
+const TOKEN_DATE_NO_EXIST = '"date";s:';
+const TOKEN_START_TIME = '"start-time";s:';
+
+const MIN_1_HOUR = 3240000;
+const MAX_1_HOUR = 3960000;
+const MIN_24_HOUR = 86040000;
+const MAX_24_HOUR = 86760000;
+const MIN_48_HOUR = 172440000;
+const MAX_48_HOUR = 173160000;
+
 const loadCurrentOrders = async (query, metaData ) => {
     
     const result = await query(SQL_GET_CURRENT_ORDERS);
@@ -61,15 +72,16 @@ const loadPostMeta = async (query, metaData) => {
         meta_key = meta_key.split('-').join('_');
         mapPostMeta[post_id][meta_key]= meta_key === 'notify_when_reaches_min' ? parseInt(meta_value) : meta_value;
     });
-    fillStartTime(mapPostMeta);
+    fillStartTime(mapPostMeta);    
     const keys = Object.keys(metaData);
     keys.forEach(key => {
-        const item = metaData[key];
-        if (mapPostMeta[item.tour_id]) {
-            metaData[key].notify_when_reaches_min = mapPostMeta[item.tour_id].notify_when_reaches_min;
-            metaData[key].email_guide = mapPostMeta[item.tour_id].email_guide;
-            metaData[key].current_time = new Date();
-            metaData[key].tour_start_time = new Date(`${metaData[key].travel_date_key} ${getTourHour(metaData[key], mapPostMeta)}:00`)
+        if (mapPostMeta[metaData[key].tour_id]) {
+            metaData[key].notify_when_reaches_min = mapPostMeta[metaData[key].tour_id].notify_when_reaches_min;
+            metaData[key].email_guide = mapPostMeta[metaData[key].tour_id].email_guide;
+            metaData[key].current_time = moment().format("YYYY-MM-DD HH:mm:ss");
+            const tour_start_time = `${metaData[key].travel_date_key} ${getTourHour(metaData[key], mapPostMeta)}:00`;
+            metaData[key].tour_start_time = moment(tour_start_time).format("YYYY-MM-DD HH:mm:ss");
+            metaData[key].diff_time = moment.utc(metaData[key].tour_start_time).diff(metaData[key].current_time);
         }
     });
 };
@@ -77,11 +89,11 @@ const loadPostMeta = async (query, metaData) => {
 const getTourHour = (item, mapPostMeta) => {
     const element = mapPostMeta[item.tour_id];    
     if (element) {
-        const key = `${element.tour_id}_${element.travel_date_key}`;
+        const key = `${item.tour_id}_${item.travel_date_key}`;
         if (element.startTimes[key]) {
             return element.startTimes[key];
-        } else if (element.startTimes[element.tour_id]) {
-            return element.startTimes[element.tour_id];
+        } else if (element.startTimes[item.tour_id]) {
+            return element.startTimes[item.tour_id];
         }
     }
     return '10:00';
@@ -96,9 +108,6 @@ const fillStartTime = (mapPostMeta) => {
 };
 
 const parseStartTime = (tour_id, options) => {
-    const TOKEN_DATE_EXIST = '"date";s:10:"';
-    const TOKEN_DATE_NO_EXIST = '"date";s:';
-    const TOKEN_START_TIME = '"start-time";s:';
     let tour_date = '';
     let tour_start_time = '';
     let startTimes = {};
@@ -143,7 +152,7 @@ const initCheckAndCompleteStatusHandler = {
         await loadCurrentOrders(query, metaData);
         await loadPostMeta(query, metaData);
         await loadNotificationStatus(query, metaData);
-        console.log(metaData);
+        return metaData;
     }
 };
 

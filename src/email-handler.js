@@ -25,18 +25,23 @@ const sendEmail = (mailOptions) => {
       });
 } 
 
-export const emailHandler = {
-    nofifyMinTravelers(to, data) {
+const senddToNotifyMinTravelers = (data) => {
 
-        let text = 'hola chango';
+  let text = 'hola chango';
 
-        const mailOptions = {
-            from: 'notify@epoktour.fr',
-            to,
-            subject: 'Sending Email using Node.js',
-            text
-          }
-        sendEmail(mailOptions);
+  const mailOptions = {
+      from: 'notify@epoktour.fr',
+      to: data.email_guide,
+      subject: 'Min travelers achived',
+      text
     }
+  sendEmail(mailOptions);
 }
-  
+
+const emailHandler = {
+  senddToNotifyMinTravelers
+}
+
+module.exports = {
+  emailHandler
+}
