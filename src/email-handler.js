@@ -107,8 +107,7 @@ const generateBookingDetail = (metaData) => {
 
 
           Tour System Notification
-  `
-  console.log(body)
+  `;
   return body;
 }
 
