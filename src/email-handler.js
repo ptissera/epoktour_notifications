@@ -1,20 +1,9 @@
 
 var nodemailer = require('nodemailer');
 const util = require('util');
+const { mailConfig } = require('./config');
 
-const transporter = nodemailer.createTransport({
-    service: 'mail.epoktour.fr',
-    port: 465,
-    secure: true,
-    auth: {
-      user: 'notify@epoktour.fr',
-      pass: '&2oadN+HFtF1'
-    },
-    tls: {
-      // do not fail on invalid certs
-      rejectUnauthorized: false
-    }
-  });
+const transporter = nodemailer.createTransport(mailConfig);
 
 const sendMail = util.promisify(transporter.sendMail).bind(transporter);
 

@@ -5,14 +5,9 @@ const { initCheckAndCompleteStatusHandler } = require('./src/init-check-and-comp
 const { validateNotificationsHandler } = require('./src/validate-notifications-handler');
 const { updateNotificationStatusHandler } = require('./src/update-notification-status-handler');
 const { emailHandler } = require('./src/email-handler');
+const { dbConfig } = require('./src/config');
 
-var conn = mysql.createConnection({
-  host: "localhost",
-  port: 3306,
-  user: "root",
-  database: "nizo1382_wp199",
-  password: "admin123"
-});
+var conn = mysql.createConnection(dbConfig);
 
 const runCheckAndNotifications = async() => {
   conn.connect(async (err) => {
