@@ -13,9 +13,8 @@ const checkMinBookingReached = (metaData) => {
         if(!metaData[key].notify_min) {
             let travelers = 0;
             metaData[key].bookings.forEach(book => {
-                travelers += book.traveller_first_name.length;
-                if (book['tour-children'].length > 0) {
-                  travelers = travelers - parseInt(book['tour-children']);
+                if (parseInt(book['tour-adult']).length > 0) {
+                  travelers += parseInt(book['tour-adult']);
                 }
             });
             metaData[key].send_notify_min = metaData[key].notify_when_reaches_min <= travelers;
@@ -55,10 +54,9 @@ const check48HourBookingReached = (metaData) => {
         if(!metaData[key].notify_48 && MIN_48_HOUR <= metaData[key].diff_time && metaData[key].diff_time <= MAX_48_HOUR) {
             let travelers = 0;
             metaData[key].bookings.forEach(book => {
-                travelers += book.traveller_first_name.length;
-                if (book['tour-children'].length > 0) {
-                    travelers = travelers - parseInt(book['tour-children']);
-                }
+                if (parseInt(book['tour-adult']).length > 0) {
+                    travelers += parseInt(book['tour-adult']);
+                  }
             });
             metaData[key].send_notify_48 = metaData[key].notify_when_reaches_min > travelers;
             metaData[key].notify_48 = metaData[key].send_notify_48;

@@ -22,15 +22,67 @@ const sendEmailToGuide = async(mailOptions) => {
     await sendMail(mailOptions);
 }
 
-const generateEmailBody = (metaData) => {
-  let body = `
-  
-  Tour information detail (${metaData.tour_id}):
-      ${metaData.travel_date_key} - ${metaData.package_group_slug}
-      ${JSON.stringify(metaData.bookings[0].package).split('<br>').join('  ')}
-      
+const getNombreVisita = (metaData) => {
+  let nombreVisita = metaData.bookings[0].package.split('<br>');
+  if (nombreVisita.length === 2) {
+    nombreVisita = nombreVisita[1];
+  } else {
+    nombreVisita = nombreVisita.join('  ')
+  }
+  return nombreVisita;
+}
 
-  Bookings:
+const generateMessageMin = (metaData) => {
+  return `
+  Bonjour,
+Le nombre de participants minimum a été atteint pour la visite "${getNombreVisita(metaData)}" ${metaData.tour_start_time} qui est donc confirmée.
+
+La liste des participants vous sera envoyée 24h avant la visite.
+
+Merci !
+
+  ${generateBookingDetail(metaData)}
+  `;
+}
+
+const generateMessage48Hours = (metaData) => {
+  let adults = 0;
+  metaData.bookings.forEach(booking => {
+    if (parseInt(booking['tour-adult']).length > 0) {
+      adults += parseInt(booking['tour-adult']);
+    }
+  });
+
+  return `
+  Bonjour,
+
+Le nombre minimum de participants pour la visite "${getNombreVisita(metaData)}" ${metaData.tour_start_time} n'a pas été atteint. Seulement x ${adults} adultes ont réservé. La visite va être reprogrammée sauf accord exceptionnel de votre part de maintenir la visite. Cet accord sera à nous envoyer par mail le plus rapidement possible.
+
+Bien cordialement
+
+
+${generateBookingDetail(metaData)}
+`;
+}
+
+const generateMessage1HourAnd24Hours = (metaData) => {
+  return `
+  Confirmation de la visite "${getNombreVisita(metaData)}" ${metaData.tour_start_time}
+Liste des participants 
+             ${generateBookingDetail(metaData)}
+N.B : N'oubliez pas :
+- Arriver 5 min en avance au point de RDV
+- Avoir un petit flacon de gel hydroalcoolique à disposition pendant la visite 
+- Sensibiliser les participants aux commentaires TripAdvisor à la fin de la visite."
+  `;
+}
+
+const generateBookingDetail = (metaData) => {
+  let body = `
+
+  ============================================
+    Bookings Detail:
+  ============================================
   `;
   metaData.bookings.forEach(booking => {
     body += `
@@ -51,10 +103,8 @@ const generateEmailBody = (metaData) => {
     `;
     });
     body += `
-       
        ------------------------------------------------------------------------------
-
-    `
+    `;
   });
 
   body += `
@@ -66,19 +116,43 @@ const generateEmailBody = (metaData) => {
   return body;
 }
 
+const FROM = 'notify@epoktour.fr';
+const SUBJECT_MIN = 'Epoktour - Nombre minimum de visiteurs atteint';
+const SUBJECT_1_HOUR_24_HOURS = 'Epoktour - Détail des réservations';
+const SUBJECT_48_HOURS = 'Epoktour - 48h Nombre minimum de visiteurs non atteint';
+
 const senddToNotifyMinTravelers = (metaData) => {
   const keys = Object.keys(metaData);
     keys.forEach(async (key) => {
-      if (metaData[key].send_notify_min==false || metaData[key].send_notify_1 || metaData[key].send_notify_24 || metaData[key].send_notify_48) {
-        let text = generateEmailBody(metaData[key]);
-
-        const mailOptions = {
-            from: 'notify@epoktour.fr',
+      if (metaData[key].send_notify_min || metaData[key].send_notify_1 || metaData[key].send_notify_24 || metaData[key].send_notify_48) {
+        if (metaData[key].send_notify_min) {
+          const mailOptions = {
+            from: FROM,
             to: metaData[key].email_guide,
-            subject: 'Min travelers achived',
-            text
+            subject: SUBJECT_MIN,
+            text: generateMessageMin(metaData[key])
           }
-         await sendEmailToGuide(mailOptions);
+          await sendEmailToGuide(mailOptions);
+        }
+        if (metaData[key].send_notify_1 || metaData[key].send_notify_24) {
+          const mailOptions = {
+            from: FROM,
+            to: metaData[key].email_guide,
+            subject: SUBJECT_1_HOUR_24_HOURS,
+            text: generateMessage1HourAnd24Hours(metaData[key])
+          }
+          await sendEmailToGuide(mailOptions);
+        }
+        if (metaData[key].send_notify_48) {
+          const mailOptions = {
+            from: FROM,
+            to: metaData[key].email_guide,
+            subject: SUBJECT_48_HOURS,
+            text: generateMessage48Hours(metaData[key])
+          }
+          await sendEmailToGuide(mailOptions);
+        }
+        
       }
     });
 }
