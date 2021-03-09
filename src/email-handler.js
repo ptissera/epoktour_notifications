@@ -18,7 +18,14 @@ const transporter = nodemailer.createTransport({
 
 const sendMail = util.promisify(transporter.sendMail).bind(transporter);
 
-const sendEmailToGuide = async(mailOptions) => {
+const sendEmailToGuide = async(metaData, subject, text) => {
+  const mailOptions = {
+    from: FROM,
+    bcc: COPIA,
+    to: metaData.email_guide,
+    subject,
+    text
+  };
     await sendMail(mailOptions);
 }
 
@@ -117,6 +124,7 @@ const generateBookingDetail = (metaData) => {
 }
 
 const FROM = 'notify@epoktour.fr';
+const COPIA = 'infotourf@gmail.com';
 const SUBJECT_MIN = 'Epoktour - Nombre minimum de visiteurs atteint';
 const SUBJECT_1_HOUR_24_HOURS = 'Epoktour - Détail des réservations';
 const SUBJECT_48_HOURS = 'Epoktour - 48h Nombre minimum de visiteurs non atteint';
@@ -126,31 +134,13 @@ const senddToNotifyMinTravelers = (metaData) => {
     keys.forEach(async (key) => {
       if (metaData[key].send_notify_min || metaData[key].send_notify_1 || metaData[key].send_notify_24 || metaData[key].send_notify_48) {
         if (metaData[key].send_notify_min) {
-          const mailOptions = {
-            from: FROM,
-            to: metaData[key].email_guide,
-            subject: SUBJECT_MIN,
-            text: generateMessageMin(metaData[key])
-          }
-          await sendEmailToGuide(mailOptions);
+          await sendEmailToGuide(metaData[key], SUBJECT_MIN, generateMessageMin(metaData[key]));
         }
         if (metaData[key].send_notify_1 || metaData[key].send_notify_24) {
-          const mailOptions = {
-            from: FROM,
-            to: metaData[key].email_guide,
-            subject: SUBJECT_1_HOUR_24_HOURS,
-            text: generateMessage1HourAnd24Hours(metaData[key])
-          }
-          await sendEmailToGuide(mailOptions);
+          await sendEmailToGuide(metaData[key], SUBJECT_1_HOUR_24_HOURS, generateMessage1HourAnd24Hours(metaData[key]));
         }
         if (metaData[key].send_notify_48) {
-          const mailOptions = {
-            from: FROM,
-            to: metaData[key].email_guide,
-            subject: SUBJECT_48_HOURS,
-            text: generateMessage48Hours(metaData[key])
-          }
-          await sendEmailToGuide(mailOptions);
+          await sendEmailToGuide(metaData[key], SUBJECT_48_HOURS, generateMessage48Hours(metaData[key]));
         }
         
       }
