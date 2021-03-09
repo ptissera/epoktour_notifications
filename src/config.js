@@ -14,7 +14,7 @@ const mailConfig = {
         user: 'notify@epoktour.fr',
         pass: '&2oadN+HFtF1'
     },
-    tls: {gi
+    tls: {
         // do not fail on invalid certs
         rejectUnauthorized: false
     }
