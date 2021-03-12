@@ -52,7 +52,7 @@ const generateMessage48Hours = (metaData) => {
   return `
   Bonjour,
 
-Le nombre minimum de participants pour la visite "${getNombreVisita(metaData)}" ${metaData.tour_start_time} n'a pas été atteint. Seulement x ${adults} adultes ont réservé. La visite va être reprogrammée sauf accord exceptionnel de votre part de maintenir la visite. Cet accord sera à nous envoyer par mail le plus rapidement possible.
+Le nombre minimum de participants pour la visite "${getNombreVisita(metaData)}" ${metaData.tour_start_time} n'a pas été atteint. Seulement ${adults} adulte(s) ont réservé. La visite va être reprogrammée sauf accord exceptionnel de votre part de maintenir la visite. Cet accord devra nous être renvoyé par mail dans les plus bref délais.
 
 Bien cordialement
 
@@ -64,13 +64,22 @@ ${generateBookingDetail(metaData)}
 const generateMessage1HourAnd24Hours = (metaData) => {
   return `
   Confirmation de la visite "${getNombreVisita(metaData)}" ${metaData.tour_start_time}
-Liste des participants 
+Total des participants: ${getTotalTravelers(metaData)}
+Liste des participants: 
              ${generateBookingDetail(metaData)}
 N.B : N'oubliez pas :
 - Arriver 5 min en avance au point de RDV
 - Avoir un petit flacon de gel hydroalcoolique à disposition pendant la visite 
 - Sensibiliser les participants aux commentaires TripAdvisor à la fin de la visite."
   `;
+}
+
+const getTotalTravelers = (metaData) => {
+  let count = 0;
+   metaData.bookings.forEach(booking => {
+     count += booking.traveller_first_name.length;
+   });
+   return count;
 }
 
 const generateBookingDetail = (metaData) => {
@@ -121,14 +130,15 @@ const senddToNotifyMinTravelers = (metaData) => {
   const keys = Object.keys(metaData);
     keys.forEach(async (key) => {
       if (metaData[key].send_notify_min || metaData[key].send_notify_1 || metaData[key].send_notify_24 || metaData[key].send_notify_48) {
+        const subjectSubfix = ` - "${getNombreVisita(metaData[key])}" ${metaData[key].tour_start_time}`;
         if (metaData[key].send_notify_min) {
-          await sendEmailToGuide(metaData[key], SUBJECT_MIN, generateMessageMin(metaData[key]));
+          await sendEmailToGuide(metaData[key], `${SUBJECT_MIN}${subjectSubfix}`, generateMessageMin(metaData[key]));
         }
         if (metaData[key].send_notify_1 || metaData[key].send_notify_24) {
-          await sendEmailToGuide(metaData[key], SUBJECT_1_HOUR_24_HOURS, generateMessage1HourAnd24Hours(metaData[key]));
+          await sendEmailToGuide(metaData[key], `${SUBJECT_1_HOUR_24_HOURS}${subjectSubfix}`, generateMessage1HourAnd24Hours(metaData[key]));
         }
         if (metaData[key].send_notify_48) {
-          await sendEmailToGuide(metaData[key], SUBJECT_48_HOURS, generateMessage48Hours(metaData[key]));
+          await sendEmailToGuide(metaData[key], `${SUBJECT_48_HOURS}${subjectSubfix}`, generateMessage48Hours(metaData[key]));
         }
         
       }
