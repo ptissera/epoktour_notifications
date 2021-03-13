@@ -28,10 +28,10 @@ const MAX_24_HOUR = 86760000;
 const MIN_48_HOUR = 172440000;
 const MAX_48_HOUR = 173160000;
 
-const loadCurrentOrders = async (query, metaData ) => {
-    
+const loadCurrentOrders = async (query, metaData) => {
+
     const result = await query(SQL_GET_CURRENT_ORDERS);
-    result.forEach(({tour_id, travel_date, travel_date_key, package_group_slug, booking_detail}) => {
+    result.forEach(({ tour_id, travel_date, travel_date_key, package_group_slug, booking_detail }) => {
         const key = `${tour_id}_${travel_date_key}`;
         if (!metaData[key]) {
             metaData[key] = {
@@ -43,7 +43,7 @@ const loadCurrentOrders = async (query, metaData ) => {
                 notify_when_reaches_min: 3,
                 email_guide: 'maira@pardigital.com.ar',
                 nuevo: true,
-                status_id:0,
+                status_id: 0,
                 notify_min: false,
                 notify_1: false,
                 notify_24: false,
@@ -62,11 +62,11 @@ const loadCurrentOrders = async (query, metaData ) => {
 };
 
 const loadPostMeta = async (query, metaData) => {
-    const result = await query(SQL_GET_POSTMETA); 
+    const result = await query(SQL_GET_POSTMETA);
     const mapPostMeta = {};
-    result.forEach(({post_id, meta_key, meta_value}) => {
+    result.forEach(({ post_id, meta_key, meta_value }) => {
         if (!mapPostMeta[post_id]) {
-            mapPostMeta[post_id]={
+            mapPostMeta[post_id] = {
                 tourmaster_tour_option: '',
                 notify_when_reaches_min: 3,
                 email_guide: 'maira@pardigital.com.ar',
@@ -74,9 +74,9 @@ const loadPostMeta = async (query, metaData) => {
             }
         }
         meta_key = meta_key.split('-').join('_');
-        mapPostMeta[post_id][meta_key]= meta_key === 'notify_when_reaches_min' ? parseInt(meta_value) : meta_value;
+        mapPostMeta[post_id][meta_key] = meta_key === 'notify_when_reaches_min' ? parseInt(meta_value) : meta_value;
     });
-    fillStartTime(mapPostMeta);    
+    fillStartTime(mapPostMeta);
     const keys = Object.keys(metaData);
     keys.forEach(key => {
         if (mapPostMeta[metaData[key].tour_id]) {
@@ -91,7 +91,7 @@ const loadPostMeta = async (query, metaData) => {
 };
 
 const getTourHour = (item, mapPostMeta) => {
-    const element = mapPostMeta[item.tour_id];    
+    const element = mapPostMeta[item.tour_id];
     if (element) {
         const key = `${item.tour_id}_${item.travel_date_key}`;
         if (element.startTimes[key]) {
@@ -116,8 +116,8 @@ const parseStartTime = (tour_id, options) => {
     let tour_start_time = '';
     let startTimes = {};
     if (options.indexOf(TOKEN_DATE_EXIST) > -1) {
-        while(options.indexOf(TOKEN_DATE_EXIST) > -1) {
-            options = options.substring(options.indexOf(TOKEN_DATE_EXIST) + TOKEN_DATE_EXIST.length)        
+        while (options.indexOf(TOKEN_DATE_EXIST) > -1) {
+            options = options.substring(options.indexOf(TOKEN_DATE_EXIST) + TOKEN_DATE_EXIST.length)
             tour_date = options.slice(0, 10);
 
             options = options.substring(options.indexOf(TOKEN_START_TIME) + TOKEN_START_TIME.length)
@@ -126,7 +126,7 @@ const parseStartTime = (tour_id, options) => {
             const start_time_key = `${tour_id}_${tour_date}`;
             startTimes[start_time_key] = tour_start_time;
         }
-    } else if (options.indexOf(TOKEN_DATE_NO_EXIST) -1) {
+    } else if (options.indexOf(TOKEN_DATE_NO_EXIST) - 1) {
         options = options.substring(options.indexOf(TOKEN_START_TIME) + TOKEN_START_TIME.length)
         tour_start_time = options.slice(options.indexOf('"') + 1, 8);
         if (tour_start_time.length > 0) {
@@ -137,23 +137,25 @@ const parseStartTime = (tour_id, options) => {
     return startTimes;
 };
 
-const loadNotificationStatus = async(query, metaData) => {
+const loadNotificationStatus = async (query, metaData) => {
     const result = await query(SQL_GET_NOTIFICATION_STATUS);
-    result.forEach(({tour_id, travel_date_key, id, notify_min, notify_1, notify_24, notify_48, total_travelers_no_children, total_travelers}) => {
+    result.forEach(({ tour_id, travel_date_key, id, notify_min, notify_1, notify_24, notify_48, total_travelers_no_children, total_travelers }) => {
         const key = `${tour_id}_${travel_date_key}`;
-        metaData[key].nuevo = false;
-        metaData[key].status_id = id;
-        metaData[key].notify_min = notify_min;
-        metaData[key].notify_1 = notify_1;
-        metaData[key].notify_24 = notify_24;
-        metaData[key].notify_48 = notify_48;
-        metaData[key].total_travelers_no_children = total_travelers_no_children;
-        metaData[key].total_travelers = total_travelers;
+        if (metaData[key]) {
+            metaData[key].nuevo = false;
+            metaData[key].status_id = id;
+            metaData[key].notify_min = notify_min;
+            metaData[key].notify_1 = notify_1;
+            metaData[key].notify_24 = notify_24;
+            metaData[key].notify_48 = notify_48;
+            metaData[key].total_travelers_no_children = total_travelers_no_children;
+            metaData[key].total_travelers = total_travelers;
+        }
     });
 };
 
 const initCheckAndCompleteStatusHandler = {
-    firstCheckAndComplete: async(query) => {
+    firstCheckAndComplete: async (query) => {
         let metaData = {}
         await loadCurrentOrders(query, metaData);
         await loadPostMeta(query, metaData);

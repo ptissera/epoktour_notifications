@@ -7,7 +7,7 @@ const transporter = nodemailer.createTransport(mailConfig);
 
 const sendMail = util.promisify(transporter.sendMail).bind(transporter);
 
-const sendEmailToGuide = async(metaData, subject, text) => {
+const sendEmailToGuide = async (metaData, subject, text) => {
   const mailOptions = {
     from: FROM,
     bcc: COPIA,
@@ -15,11 +15,11 @@ const sendEmailToGuide = async(metaData, subject, text) => {
     subject,
     text
   };
-    await sendMail(mailOptions);
+  await sendMail(mailOptions);
 }
 
 const getNombreVisita = (metaData) => {
-  let nombreVisita = metaData.bookings[0].package.split('<br>');
+  let nombreVisita = metaData.bookings[0].package.replace('<br \/>','<br/>').replace('<br\/>','<br>').split('<br>');
   if (nombreVisita.length === 2) {
     nombreVisita = nombreVisita[1];
   } else {
@@ -64,30 +64,51 @@ ${generateBookingDetail(metaData)}
 const generateMessage1HourAnd24Hours = (metaData) => {
   return `
   Confirmation de la visite "${getNombreVisita(metaData)}" ${metaData.tour_start_time}
+  
 Total des participants: ${getTotalTravelers(metaData)}
 Liste des participants: 
-             ${generateBookingDetail(metaData)}
+   ${getTravelersList(metaData)}
 N.B : N'oubliez pas :
 - Arriver 5 min en avance au point de RDV
 - Avoir un petit flacon de gel hydroalcoolique à disposition pendant la visite 
 - Sensibiliser les participants aux commentaires TripAdvisor à la fin de la visite."
+
+
+
+
+
+${generateBookingDetail(metaData)}
   `;
 }
 
 const getTotalTravelers = (metaData) => {
   let count = 0;
-   metaData.bookings.forEach(booking => {
-     count += booking.traveller_first_name.length;
-   });
-   return count;
+  metaData.bookings.forEach(booking => {
+    count += booking.traveller_first_name.length;
+  });
+  return count;
 }
+
+const getTravelersList = (metaData) => {
+  let list = '';
+  let count = 0;
+  metaData.bookings.forEach(booking => {
+    booking.traveller_first_name.forEach((first_name, index) => {
+      count++;
+      list += `               ${count})  ${first_name}, ${booking.traveller_last_name[index]}
+    `;
+    });
+  });
+  return list;
+}
+
 
 const generateBookingDetail = (metaData) => {
   let body = `
 
-  ============================================
+  ========================================================================================
     Bookings Detail:
-  ============================================
+  ========================================================================================
   `;
   metaData.bookings.forEach(booking => {
     body += `
@@ -108,7 +129,7 @@ const generateBookingDetail = (metaData) => {
     `;
     });
     body += `
-       ------------------------------------------------------------------------------
+    ========================================================================================
     `;
   });
 
@@ -128,21 +149,21 @@ const SUBJECT_48_HOURS = 'Epoktour - 48h Nombre minimum de visiteurs non atteint
 
 const senddToNotifyMinTravelers = (metaData) => {
   const keys = Object.keys(metaData);
-    keys.forEach(async (key) => {
-      if (metaData[key].send_notify_min || metaData[key].send_notify_1 || metaData[key].send_notify_24 || metaData[key].send_notify_48) {
-        const subjectSubfix = ` - "${getNombreVisita(metaData[key])}" ${metaData[key].tour_start_time}`;
-        if (metaData[key].send_notify_min) {
-          await sendEmailToGuide(metaData[key], `${SUBJECT_MIN}${subjectSubfix}`, generateMessageMin(metaData[key]));
-        }
-        if (metaData[key].send_notify_1 || metaData[key].send_notify_24) {
-          await sendEmailToGuide(metaData[key], `${SUBJECT_1_HOUR_24_HOURS}${subjectSubfix}`, generateMessage1HourAnd24Hours(metaData[key]));
-        }
-        if (metaData[key].send_notify_48) {
-          await sendEmailToGuide(metaData[key], `${SUBJECT_48_HOURS}${subjectSubfix}`, generateMessage48Hours(metaData[key]));
-        }
-        
+  keys.forEach(async (key) => {
+    if (metaData[key].send_notify_min || metaData[key].send_notify_1 || metaData[key].send_notify_24 || metaData[key].send_notify_48) {
+      const subjectSubfix = ` - "${getNombreVisita(metaData[key])}" ${metaData[key].tour_start_time}`;
+      if (metaData[key].send_notify_min) {
+        await sendEmailToGuide(metaData[key], `${SUBJECT_MIN}${subjectSubfix}`, generateMessageMin(metaData[key]));
       }
-    });
+      if (metaData[key].send_notify_1 || metaData[key].send_notify_24) {
+        await sendEmailToGuide(metaData[key], `${SUBJECT_1_HOUR_24_HOURS}${subjectSubfix}`, generateMessage1HourAnd24Hours(metaData[key]));
+      }
+      if (metaData[key].send_notify_48) {
+        await sendEmailToGuide(metaData[key], `${SUBJECT_48_HOURS}${subjectSubfix}`, generateMessage48Hours(metaData[key]));
+      }
+
+    }
+  });
 }
 
 const emailHandler = {
