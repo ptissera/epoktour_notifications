@@ -13,7 +13,7 @@ const checkMinBookingReached = (metaData) => {
         if(!metaData[key].notify_min) {
             let travelers = 0;
             metaData[key].bookings.forEach(book => {
-                if (parseInt(book['tour-adult']).length > 0) {
+                if (parseInt(book['tour-adult']) > 0) {
                   travelers += parseInt(book['tour-adult']);
                 }
             });

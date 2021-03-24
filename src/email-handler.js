@@ -4,8 +4,13 @@ const util = require('util');
 const { mailConfig } = require('./config');
 
 const transporter = nodemailer.createTransport(mailConfig);
-
 const sendMail = util.promisify(transporter.sendMail).bind(transporter);
+
+const FROM = 'notify@epoktour.fr';
+const COPIA = 'infotourf@gmail.com';
+const SUBJECT_MIN = 'Epoktour - Nombre minimum de visiteurs atteint';
+const SUBJECT_1_HOUR_24_HOURS = 'Epoktour - Détail des réservations';
+const SUBJECT_48_HOURS = 'Epoktour - 48h Nombre minimum de visiteurs non atteint';
 
 const sendEmailToGuide = async (metaData, subject, text) => {
   const mailOptions = {
@@ -140,12 +145,6 @@ const generateBookingDetail = (metaData) => {
   `;
   return body;
 }
-
-const FROM = 'notify@epoktour.fr';
-const COPIA = 'infotourf@gmail.com';
-const SUBJECT_MIN = 'Epoktour - Nombre minimum de visiteurs atteint';
-const SUBJECT_1_HOUR_24_HOURS = 'Epoktour - Détail des réservations';
-const SUBJECT_48_HOURS = 'Epoktour - 48h Nombre minimum de visiteurs non atteint';
 
 const senddToNotifyMinTravelers = (metaData) => {
   const keys = Object.keys(metaData);
