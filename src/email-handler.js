@@ -24,7 +24,7 @@ const sendEmailToGuide = async (metaData, subject, text) => {
 }
 
 const getNombreVisita = (metaData) => {
-  let nombreVisita = metaData.bookings[0].package.replace('<br \/>','<br/>').replace('<br\/>','<br>').split('<br>');
+  let nombreVisita = metaData.bookings[0].package.replace('<br \/>', '<br/>').replace('<br\/>', '<br>').split('<br>');
   if (nombreVisita.length === 2) {
     nombreVisita = nombreVisita[1];
   } else {
@@ -51,6 +51,9 @@ const generateMessage48Hours = (metaData) => {
   metaData.bookings.forEach(booking => {
     if (parseInt(booking['tour-adult']).length > 0) {
       adults += parseInt(booking['tour-adult']);
+    }
+    if (parseInt(book['tour-female']).length > 0) {
+      adults += parseInt(book['tour-female']);
     }
   });
 
@@ -117,7 +120,7 @@ const generateBookingDetail = (metaData) => {
   `;
   metaData.bookings.forEach(booking => {
     body += `
-      adult: ${booking['tour-adult']}   - children: ${booking['tour-children']}   - student: ${booking['tour-student']}   - infant: ${booking['tour-infant']}
+      adult: ${booking['tour-adult']}   - female: ${booking['tour-female']}   - children: ${booking['tour-children']}   - student: ${booking['tour-student']}   - infant: ${booking['tour-infant']}
       coupon code: ${booking['coupon-code']}
 
       Contact Information:
