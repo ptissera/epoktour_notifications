@@ -52,9 +52,6 @@ const generateMessage48Hours = (metaData) => {
     if (parseInt(booking['tour-adult']).length > 0) {
       adults += parseInt(booking['tour-adult']);
     }
-    if (parseInt(book['tour-female']).length > 0) {
-      adults += parseInt(book['tour-female']);
-    }
   });
 
   return `
