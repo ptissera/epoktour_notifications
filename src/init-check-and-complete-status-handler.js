@@ -44,6 +44,7 @@ const loadCurrentOrders = async (query, metaData) => {
                 bookings: [],
                 notify_when_reaches_min: 3,
                 email_guide: 'maira@pardigital.com.ar',
+                tour_name_email: '',
                 nuevo: true,
                 status_id: 0,
                 notify_min: false,
@@ -72,6 +73,7 @@ const loadPostMeta = async (query, metaData) => {
                 tourmaster_tour_option: '',
                 notify_when_reaches_min: 3,
                 email_guide: 'maira@pardigital.com.ar',
+                tour_name_email: '',
                 startTimes: {}
             }
         }
@@ -84,6 +86,7 @@ const loadPostMeta = async (query, metaData) => {
         if (mapPostMeta[metaData[key].tour_id]) {
             metaData[key].notify_when_reaches_min = mapPostMeta[metaData[key].tour_id].notify_when_reaches_min;
             metaData[key].email_guide = mapPostMeta[metaData[key].tour_id].email_guide;
+            metaData[key].tour_name_email = mapPostMeta[metaData[key].tour_id].tour_name_email;
             metaData[key].current_time = moment().format("YYYY-MM-DD HH:mm:ss");
             const tour_start_time = `${metaData[key].travel_date_key} ${getTourHour(metaData[key], mapPostMeta)}:00`;
             metaData[key].tour_start_time = moment(tour_start_time).format("YYYY-MM-DD HH:mm:ss");

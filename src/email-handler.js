@@ -23,20 +23,10 @@ const sendEmailToGuide = async (metaData, subject, text) => {
   await sendMail(mailOptions);
 }
 
-const getNombreVisita = (metaData) => {
-  let nombreVisita = metaData.bookings[0].package.replace('<br \/>', '<br/>').replace('<br\/>', '<br>').split('<br>');
-  if (nombreVisita.length === 2) {
-    nombreVisita = nombreVisita[1];
-  } else {
-    nombreVisita = nombreVisita.join('  ')
-  }
-  return nombreVisita;
-}
-
 const generateMessageMin = (metaData) => {
   return `
   Bonjour,
-Le nombre de participants minimum a été atteint pour la visite "${getNombreVisita(metaData)}" ${metaData.tour_start_time} qui est donc confirmée.
+Le nombre de participants minimum a été atteint pour la visite "${metaData.tour_name_email}" ${metaData.tour_start_time} qui est donc confirmée.
 
 La liste des participants vous sera envoyée 24h avant la visite.
 
@@ -57,7 +47,7 @@ const generateMessage48Hours = (metaData) => {
   return `
   Bonjour,
 
-Le nombre minimum de participants pour la visite "${getNombreVisita(metaData)}" ${metaData.tour_start_time} n'a pas été atteint. Seulement ${adults} adulte(s) ont réservé. La visite va être reprogrammée sauf accord exceptionnel de votre part de maintenir la visite. Cet accord devra nous être renvoyé par mail dans les plus bref délais.
+Le nombre minimum de participants pour la visite "${metaData.tour_name_email}" ${metaData.tour_start_time} n'a pas été atteint. Seulement ${adults} adulte(s) ont réservé. La visite va être reprogrammée sauf accord exceptionnel de votre part de maintenir la visite. Cet accord devra nous être renvoyé par mail dans les plus bref délais.
 
 Bien cordialement
 
@@ -68,7 +58,7 @@ ${generateBookingDetail(metaData)}
 
 const generateMessage1HourAnd24Hours = (metaData) => {
   return `
-  Confirmation de la visite "${getNombreVisita(metaData)}" ${metaData.tour_start_time}
+  Confirmation de la visite "${metaData.tour_name_email}" ${metaData.tour_start_time}
   
 Total des participants: ${getTotalTravelers(metaData)}
 Liste des participants: 
@@ -112,7 +102,7 @@ const generateBookingDetail = (metaData) => {
   let body = `
 
   ========================================================================================
-    Bookings Detail:
+    Détail des réservations:
   ========================================================================================
   `;
   let tour_male = booking['tour-male'];
@@ -122,16 +112,16 @@ const generateBookingDetail = (metaData) => {
   metaData.bookings.forEach(booking => {
     body += `
       adultes: ${booking['tour-adult']}   - jeunes: ${booking['tour-student']}   - enfants: ${booking['tour-children']}   - etudiants: ${booking['tour-female']}   - libre: ${booking['tour-infant']}   - pre ado: ${tour_male}
-      coupon code: ${booking['coupon-code']}
+      Code de coupon: ${booking['coupon-code']}
 
-      Contact Information:
-         first name: ${booking.first_name}
-         last name: ${booking.last_name}
-         email: ${booking.email}
-         phone: ${booking.phone}
-         country: ${booking.country}
+      Coordonnées:
+         prénom: ${booking.first_name}
+         nom: ${booking.last_name}
+         e-mail: ${booking.email}
+         téléphone: ${booking.phone}
+         pays: ${booking.country}
       
-      Travelers:
+      Voyageurs:
     `;
     booking.traveller_first_name.forEach((first_name, index) => {
       body += `         ${first_name}, ${booking.traveller_last_name[index]}
@@ -145,7 +135,7 @@ const generateBookingDetail = (metaData) => {
   body += `
 
 
-          Tour System Notification
+          Notification du système de visite
   `;
   return body;
 }
@@ -154,7 +144,7 @@ const senddToNotifyMinTravelers = (metaData) => {
   const keys = Object.keys(metaData);
   keys.forEach(async (key) => {
     if (metaData[key].send_notify_min || metaData[key].send_notify_1 || metaData[key].send_notify_24 || metaData[key].send_notify_48) {
-      const subjectSubfix = ` - "${getNombreVisita(metaData[key])}" ${metaData[key].tour_start_time}`;
+      const subjectSubfix = ` - "${metaData[key].tour_name_email}" ${metaData[key].tour_start_time}`;
       if (metaData[key].send_notify_min) {
         await sendEmailToGuide(metaData[key], `${SUBJECT_MIN}${subjectSubfix}`, generateMessageMin(metaData[key]));
       }
