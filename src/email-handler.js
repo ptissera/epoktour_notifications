@@ -117,7 +117,7 @@ const generateBookingDetail = (metaData) => {
   `;
   metaData.bookings.forEach(booking => {
     body += `
-      adult: ${booking['tour-adult']}   - female: ${booking['tour-female']}   - children: ${booking['tour-children']}   - student: ${booking['tour-student']}   - infant: ${booking['tour-infant']}
+      adultes: ${booking['tour-adult']}   - jeunes: ${booking['tour-student']}   - enfants: ${booking['tour-children']}   - etudiants: ${booking['tour-female']}   - libre: ${booking['tour-infant']}   - pre ado: ${booking['tour-male']}
       coupon code: ${booking['coupon-code']}
 
       Contact Information:
