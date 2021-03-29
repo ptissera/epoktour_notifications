@@ -115,9 +115,13 @@ const generateBookingDetail = (metaData) => {
     Bookings Detail:
   ========================================================================================
   `;
+  let tour_male = booking['tour-male'];
+  if (tour_male == null) {
+    tour_male = 0;
+  }
   metaData.bookings.forEach(booking => {
     body += `
-      adultes: ${booking['tour-adult']}   - jeunes: ${booking['tour-student']}   - enfants: ${booking['tour-children']}   - etudiants: ${booking['tour-female']}   - libre: ${booking['tour-infant']}   - pre ado: ${booking['tour-male']}
+      adultes: ${booking['tour-adult']}   - jeunes: ${booking['tour-student']}   - enfants: ${booking['tour-children']}   - etudiants: ${booking['tour-female']}   - libre: ${booking['tour-infant']}   - pre ado: ${tour_male}
       coupon code: ${booking['coupon-code']}
 
       Contact Information:

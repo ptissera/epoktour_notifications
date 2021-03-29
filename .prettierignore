@@ -1,8 +1,0 @@
-lb4
-coverage
-node_modules
-package-lock.json
-*secret.json
-*firebase.json
-*app.yaml
-gke_deployment

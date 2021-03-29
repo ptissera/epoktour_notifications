@@ -6,7 +6,7 @@ const SQL_GET_POSTMETA = `SELECT *
     FROM wp0g_postmeta
     WHERE meta_key='notify_when_reaches_min'
     OR meta_key='email_guide'
-    OR meta_key='_yoast_wpseo_title'
+    OR meta_key='tour_name_email'
     OR meta_key='tourmaster-tour-option'`;
 
 const SQL_GET_CURRENT_ORDERS = `SELECT tour_id, travel_date, date_format(travel_date, '%Y-%m-%d') travel_date_key, package_group_slug, booking_detail
