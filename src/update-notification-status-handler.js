@@ -32,9 +32,14 @@ const update = async(query, metaData) => {
         ${metaData[key].notify_48},
         ${travelers_no_children},
         ${travelers})`;
+        try {
         await query(SQL_CREATE_NOTIFICATION_STATUS);
+        } catch(e) {
+          console.error(SQL_CREATE_NOTIFICATION_STATUS);
+        }
       } else if (metaData[key].send_notify_min || metaData[key].send_notify_1 || metaData[key].send_notify_24 || metaData[key].send_notify_48) {
         const SQL_UPDATE_NOTIFICATION_STATUS = `UPDATE wp0g_pg_notification_status SET
+          package_group_slug = "${metaData[key].package_group_slug}",
           notify_min = ${metaData[key].notify_min},
           notify_1 = ${metaData[key].notify_1},
           notify_24 = ${metaData[key].notify_24},

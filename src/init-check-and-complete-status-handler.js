@@ -29,6 +29,7 @@ const MIN_24_HOUR = 86040000;
 const MAX_24_HOUR = 86760000;
 const MIN_48_HOUR = 172440000;
 const MAX_48_HOUR = 173160000;
+const metaDataAllKeys = {};
 
 const loadCurrentOrders = async (query, metaData) => {
 
@@ -84,6 +85,9 @@ const loadPostMeta = async (query, metaData) => {
     const keys = Object.keys(metaData);
     keys.forEach(key => {
         if (mapPostMeta[metaData[key].tour_id]) {
+            if (metaDataAllKeys[key]) {
+                delete metaDataAllKeys[key];
+            }
             metaData[key].notify_when_reaches_min = mapPostMeta[metaData[key].tour_id].notify_when_reaches_min;
             metaData[key].email_guide = mapPostMeta[metaData[key].tour_id].email_guide;
             metaData[key].tour_name_email = mapPostMeta[metaData[key].tour_id].tour_name_email;
@@ -91,6 +95,40 @@ const loadPostMeta = async (query, metaData) => {
             const tour_start_time = `${metaData[key].travel_date_key} ${getTourHour(metaData[key], mapPostMeta)}:00`;
             metaData[key].tour_start_time = moment(tour_start_time).format("YYYY-MM-DD HH:mm:ss");
             metaData[key].diff_time = moment.utc(metaData[key].tour_start_time).diff(metaData[key].current_time);
+        }
+    });
+
+    // agrego todos los tours que aun no tienen reservas para saber 48hs antes si envio en email
+    const auxKeys = Object.keys(metaDataAllKeys);
+    auxKeys.forEach(key => {
+        const tour_start_time_string = `${metaDataAllKeys[key].travel_date_key} ${getTourHour(metaDataAllKeys[key], mapPostMeta)}:00`;
+        const tour_start_time = moment(tour_start_time_string).format("YYYY-MM-DD HH:mm:ss");
+        if (moment().diff(metaDataAllKeys[key].travel_date_key) <= 0) {
+            metaData[key] = {
+                tour_id: metaDataAllKeys[key].tour_id,
+                travel_date_key: metaDataAllKeys[key].travel_date_key,
+                notify_when_reaches_min: mapPostMeta[metaDataAllKeys[key].tour_id].notify_when_reaches_min,
+                email_guide: mapPostMeta[metaDataAllKeys[key].tour_id].email_guide,
+                tour_name_email: mapPostMeta[metaDataAllKeys[key].tour_id].tour_name_email,
+                current_time: moment().format("YYYY-MM-DD HH:mm:ss"),
+                tour_start_time,
+                diff_time: moment.utc(metaDataAllKeys[key].tour_start_time).diff(metaDataAllKeys[key].current_time),
+                travel_date: moment(metaDataAllKeys[key].travel_date_key).format("YYYY-MM-DD HH:mm:ss"),
+                bookings: [],
+                package_group_slug: 'sin reserva',
+                nuevo: true,
+                status_id: 0,
+                notify_min: false,
+                notify_1: false,
+                notify_24: false,
+                notify_48: false,
+                send_notify_min: false,
+                send_notify_1: false,
+                send_notify_24: false,
+                send_notify_48: false,
+                total_travelers_no_children: 0,
+                total_travelers: 0
+            }
         }
     });
 };
@@ -130,6 +168,12 @@ const parseStartTime = (tour_id, options) => {
 
             const start_time_key = `${tour_id}_${tour_date}`;
             startTimes[start_time_key] = tour_start_time;
+            metaDataAllKeys[`${tour_id}_${tour_date}`] = {
+                start_time_key,
+                tour_date,
+                tour_id,
+                travel_date_key: tour_date
+            }
         }
     } else if (options.indexOf(TOKEN_DATE_NO_EXIST) - 1) {
         options = options.substring(options.indexOf(TOKEN_START_TIME) + TOKEN_START_TIME.length)
