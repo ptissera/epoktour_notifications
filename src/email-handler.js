@@ -15,7 +15,7 @@ const SUBJECT_48_HOURS = 'Epoktour - 48h Nombre minimum de visiteurs non atteint
 const sendEmailToGuide = async (metaData, subject, text) => {
   const mailOptions = {
     from: FROM,
-    bcc: COPIA,
+    cc: COPIA,
     to: metaData.email_guide,
     subject,
     text
