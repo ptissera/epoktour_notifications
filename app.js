@@ -1,6 +1,5 @@
 var mysql = require('mysql');
 const util = require('util');
-var nodemailer = require('nodemailer');
 const { initCheckAndCompleteStatusHandler } = require('./src/init-check-and-complete-status-handler');
 const { validateNotificationsHandler } = require('./src/validate-notifications-handler');
 const { updateNotificationStatusHandler } = require('./src/update-notification-status-handler');

@@ -170,8 +170,13 @@ const senddToNotifyMinTravelers = (metaData) => {
   });
 }
 
+const generateTestEmail = async (metaData) => {
+  await sendEmailToGuide({email_guide: 'tissera.pablo@gmail.com'}, `Test send email from epoktour ${new Date()}`, 'FYI');
+}
+
 const emailHandler = {
-  senddToNotifyMinTravelers
+  senddToNotifyMinTravelers,
+  generateTestEmail
 }
 
 module.exports = {
