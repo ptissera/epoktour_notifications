@@ -35,7 +35,7 @@ const loadCurrentOrders = async (query, metaData) => {
 
     const result = await query(SQL_GET_CURRENT_ORDERS);
     result.forEach(({ tour_id, travel_date, travel_date_key, package_group_slug, booking_detail }) => {
-        const key = `${tour_id}_${travel_date_key}`;
+        const key = `${tour_id}_${travel_date_key}_${package_group_slug}`;
         if (!metaData[key]) {
             metaData[key] = {
                 tour_id,
@@ -188,8 +188,8 @@ const parseStartTime = (tour_id, options) => {
 
 const loadNotificationStatus = async (query, metaData) => {
     const result = await query(SQL_GET_NOTIFICATION_STATUS);
-    result.forEach(({ tour_id, travel_date_key, id, notify_min, notify_1, notify_24, notify_48, total_travelers_no_children, total_travelers }) => {
-        const key = `${tour_id}_${travel_date_key}`;
+    result.forEach(({ tour_id, travel_date_key, id, notify_min, notify_1, notify_24, notify_48, total_travelers_no_children, total_travelers, package_group_slug }) => {
+        const key = `${tour_id}_${travel_date_key}_${package_group_slug}`;
         if (metaData[key]) {
             metaData[key].nuevo = false;
             metaData[key].status_id = id;

@@ -19,8 +19,9 @@ const runCheckAndNotifications = async() => {
       validateNotificationsHandler.check24HourBookingReached(metaData);
       validateNotificationsHandler.check48HourBookingReached(metaData);
       updateNotificationStatusHandler.update(query, metaData);
+      //markToForceReSend(metaData);
       emailHandler.senddToNotifyMinTravelers(metaData);
-  //    logMetaData(metaData);
+      //logMetaData(metaData);
       try {  
         conn.end();
       } catch(err) {
@@ -29,22 +30,32 @@ const runCheckAndNotifications = async() => {
   });
 };
 
+const markToForceReSend = (metaData) => {
+  const keys = Object.keys(metaData);
+  const FORCE = { 
+    //99: { send_notify_min: true,  send_notify_1: false,  send_notify_24: true, send_notify_48:true},
+    //97: { send_notify_min: true,  send_notify_1: false,  send_notify_24: false, send_notify_48:false},
+    //94: { send_notify_min: true,  send_notify_1: false,  send_notify_24: false, send_notify_48:true},
+    //101: { send_notify_min: true,  send_notify_1: false,  send_notify_24: false, send_notify_48:false},
+  //  228: { send_notify_min: false,  send_notify_1: false,  send_notify_24: false, send_notify_48:true},
+  };
+  keys.forEach(key => {
+    if(FORCE[metaData[key].status_id]) {
+      metaData[key].send_notify_min =FORCE[metaData[key].status_id].send_notify_min;
+      metaData[key].send_notify_1=FORCE[metaData[key].status_id].send_notify_1;
+      metaData[key].send_notify_24=FORCE[metaData[key].status_id].send_notify_24;
+      metaData[key].send_notify_48=FORCE[metaData[key].status_id].send_notify_48;
+    }
+  });
+}
+
 const logMetaData = (metaData) => {
   const keys = Object.keys(metaData);
   keys.forEach(key => {
-    let travelers_no_children = 0;
-    let travelers = 0;
-    metaData[key].booking.forEach(book => {
-        travelers += book.traveller_first_name.length;
-        travelers_no_children += book.traveller_first_name.length;
-        if (book['tour-children'].length > 0) {
-          travelers_no_children = travelers_no_children - parseInt(book['tour-children']);
-        }
-    });
-    metaData[key].total_travelers_no_children = travelers_no_children;
-    metaData[key].total_travelers = travelers;
+    if (metaData[key].package_group_slug !== "sin reserva" && metaData[key].status_id ) {
+    console.log(`${metaData[key].status_id} - ${metaData[key].travel_date}`);
+    }
   });
-  console.log(metaData);
 }
 
 runCheckAndNotifications();

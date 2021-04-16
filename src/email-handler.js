@@ -50,7 +50,7 @@ Bien cordialement
 
   let adults = 0;
   metaData.bookings.forEach(booking => {
-    if (parseInt(booking['tour-adult']).length > 0) {
+    if (!!booking['tour-adult'] && parseInt(booking['tour-adult']) > 0) {
       adults += parseInt(booking['tour-adult']);
     }
   });
@@ -116,13 +116,10 @@ const generateBookingDetail = (metaData) => {
     Détail des réservations:
   ========================================================================================
   `;
-  let tour_male = booking['tour-male'];
-  if (tour_male == null) {
-    tour_male = 0;
-  }
+
   metaData.bookings.forEach(booking => {
     body += `
-      adultes: ${booking['tour-adult']}   - jeunes: ${booking['tour-student']}   - enfants: ${booking['tour-children']}   - etudiants: ${booking['tour-female']}   - libre: ${booking['tour-infant']}   - pre ado: ${tour_male}
+      adultes: ${booking['tour-adult']}   - jeunes: ${booking['tour-student']}   - enfants: ${booking['tour-children']}   - etudiants: ${booking['tour-female']}   - libre: ${booking['tour-infant']}   - pre ado: ${booking['tour-male']}
       Code de coupon: ${booking['coupon-code']}
 
       Coordonnées:
@@ -165,7 +162,6 @@ const senddToNotifyMinTravelers = (metaData) => {
       if (metaData[key].send_notify_48) {
         await sendEmailToGuide(metaData[key], `${SUBJECT_48_HOURS}${subjectSubfix}`, generateMessage48Hours(metaData[key]));
       }
-
     }
   });
 }

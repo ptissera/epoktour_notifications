@@ -1,16 +1,16 @@
-
-const update = async(query, metaData) => {
-
+const update = async (query, metaData) => {
   const keys = Object.keys(metaData);
-    keys.forEach(async (key) => {
+  keys.forEach(async (key) => {
+    
       let travelers_no_children = 0;
       let travelers = 0;
-      metaData[key].bookings.forEach(book => {
-          travelers += book.traveller_first_name.length;
-          travelers_no_children += book.traveller_first_name.length;
-          if (book['tour-children'].length > 0) {
-            travelers_no_children = travelers_no_children - parseInt(book['tour-children']);
-          }
+      metaData[key].bookings.forEach((book) => {
+        travelers += book.traveller_first_name.length;
+        travelers_no_children += book.traveller_first_name.length;
+        if (book["tour-children"].length > 0) {
+          travelers_no_children =
+            travelers_no_children - parseInt(book["tour-children"]);
+        }
       });
       if (metaData[key].nuevo) {
         const SQL_CREATE_NOTIFICATION_STATUS = `INSERT INTO wp0g_pg_notification_status (
@@ -24,7 +24,7 @@ const update = async(query, metaData) => {
           total_travelers_no_children, 
           total_travelers)
         VALUES (${metaData[key].tour_id},
-        "${metaData[key].travel_date_key }",
+        "${metaData[key].travel_date_key}",
         "${metaData[key].package_group_slug}",
         ${metaData[key].notify_min},
         ${metaData[key].notify_1},
@@ -33,11 +33,16 @@ const update = async(query, metaData) => {
         ${travelers_no_children},
         ${travelers})`;
         try {
-        await query(SQL_CREATE_NOTIFICATION_STATUS);
-        } catch(e) {
+          await query(SQL_CREATE_NOTIFICATION_STATUS);
+        } catch (e) {
           console.error(SQL_CREATE_NOTIFICATION_STATUS);
         }
-      } else if (metaData[key].send_notify_min || metaData[key].send_notify_1 || metaData[key].send_notify_24 || metaData[key].send_notify_48) {
+      } else if (
+        metaData[key].send_notify_min ||
+        metaData[key].send_notify_1 ||
+        metaData[key].send_notify_24 ||
+        metaData[key].send_notify_48
+      ) {
         const SQL_UPDATE_NOTIFICATION_STATUS = `UPDATE wp0g_pg_notification_status SET
           package_group_slug = "${metaData[key].package_group_slug}",
           notify_min = ${metaData[key].notify_min},
@@ -49,14 +54,14 @@ const update = async(query, metaData) => {
         WHERE id = ${metaData[key].status_id}`;
         await query(SQL_UPDATE_NOTIFICATION_STATUS);
       }
-    });
+    }
+  );
 };
 
-
 const updateNotificationStatusHandler = {
-  update
-}
+  update,
+};
 
 module.exports = {
-  updateNotificationStatusHandler
-}
+  updateNotificationStatusHandler,
+};
