@@ -74,14 +74,12 @@ const loadPostMeta = async (query, metaData) => {
                 tourmaster_tour_option: '',
                 notify_when_reaches_min: 3,
                 email_guide: 'maira@pardigital.com.ar',
-                tour_name_email: '',
-                startTimes: {}
+                tour_name_email: ''
             }
         }
         meta_key = meta_key.split('-').join('_');
         mapPostMeta[post_id][meta_key] = meta_key === 'notify_when_reaches_min' ? parseInt(meta_value) : meta_value;
     });
-    fillStartTime(mapPostMeta);
     const keys = Object.keys(metaData);
     keys.forEach(key => {
         if (mapPostMeta[metaData[key].tour_id]) {
@@ -92,16 +90,17 @@ const loadPostMeta = async (query, metaData) => {
             metaData[key].email_guide = mapPostMeta[metaData[key].tour_id].email_guide;
             metaData[key].tour_name_email = mapPostMeta[metaData[key].tour_id].tour_name_email;
             metaData[key].current_time = moment().format("YYYY-MM-DD HH:mm:ss");
-            const tour_start_time = `${metaData[key].travel_date_key} ${getTourHour(metaData[key], mapPostMeta)}:00`;
+            const tour_start_time = `${metaData[key].travel_date_key} ${getTourHour(metaData[key])}`;
+            metaData[key].startTimes = moment(tour_start_time).format("YYYY-MM-DD HH:mm:ss");
             metaData[key].tour_start_time = moment(tour_start_time).format("YYYY-MM-DD HH:mm:ss");
             metaData[key].diff_time = moment.utc(metaData[key].tour_start_time).diff(metaData[key].current_time);
         }
     });
 
-    // agrego todos los tours que aun no tienen reservas para saber 48hs antes si envio en email
+    // agrego todos los tours que aun no tienen reservas para saber 48hs antes si envio el email
     const auxKeys = Object.keys(metaDataAllKeys);
     auxKeys.forEach(key => {
-        const tour_start_time_string = `${metaDataAllKeys[key].travel_date_key} ${getTourHour(metaDataAllKeys[key], mapPostMeta)}:00`;
+        const tour_start_time_string = `${metaDataAllKeys[key].travel_date_key} ${getTourHour(metaDataAllKeys[key])}`;
         const tour_start_time = moment(tour_start_time_string).format("YYYY-MM-DD HH:mm:ss");
         if (moment().diff(metaDataAllKeys[key].travel_date_key) <= 0) {
             metaData[key] = {
@@ -133,58 +132,14 @@ const loadPostMeta = async (query, metaData) => {
     });
 };
 
-const getTourHour = (item, mapPostMeta) => {
-    const element = mapPostMeta[item.tour_id];
-    if (element) {
-        const key = `${item.tour_id}_${item.travel_date_key}`;
-        if (element.startTimes[key]) {
-            return element.startTimes[key];
-        } else if (element.startTimes[item.tour_id]) {
-            return element.startTimes[item.tour_id];
-        }
-    }
-    return '10:00';
+const getTourHour = (item) => {
+  const matcher = item.package_group_slug.match(/(\d+)[h]((\d)+)?/gm);
+  if (matcher) {
+     const splited = matcher[0].toLowerCase().split('h')
+     return `${splited[0]}:${!!splited[1]?splited[1]:'00'}:00`;
+  }
+    return '10:00:00';
 }
-
-const fillStartTime = (mapPostMeta) => {
-    const keys = Object.keys(mapPostMeta);
-    keys.forEach(key => {
-        mapPostMeta[key].startTimes = parseStartTime(key, mapPostMeta[key].tourmaster_tour_option);
-        delete mapPostMeta[key].tourmaster_tour_option;
-    });
-};
-
-const parseStartTime = (tour_id, options) => {
-    let tour_date = '';
-    let tour_start_time = '';
-    let startTimes = {};
-    if (options.indexOf(TOKEN_DATE_EXIST) > -1) {
-        while (options.indexOf(TOKEN_DATE_EXIST) > -1) {
-            options = options.substring(options.indexOf(TOKEN_DATE_EXIST) + TOKEN_DATE_EXIST.length)
-            tour_date = options.slice(0, 10);
-
-            options = options.substring(options.indexOf(TOKEN_START_TIME) + TOKEN_START_TIME.length)
-            tour_start_time = options.slice(options.indexOf('"') + 1, 8);
-
-            const start_time_key = `${tour_id}_${tour_date}`;
-            startTimes[start_time_key] = tour_start_time;
-            metaDataAllKeys[`${tour_id}_${tour_date}`] = {
-                start_time_key,
-                tour_date,
-                tour_id,
-                travel_date_key: tour_date
-            }
-        }
-    } else if (options.indexOf(TOKEN_DATE_NO_EXIST) - 1) {
-        options = options.substring(options.indexOf(TOKEN_START_TIME) + TOKEN_START_TIME.length)
-        tour_start_time = options.slice(options.indexOf('"') + 1, 8);
-        if (tour_start_time.length > 0) {
-            const start_time_key = `${tour_id}`;
-            startTimes[start_time_key] = tour_start_time;
-        }
-    }
-    return startTimes;
-};
 
 const loadNotificationStatus = async (query, metaData) => {
     const result = await query(SQL_GET_NOTIFICATION_STATUS);
