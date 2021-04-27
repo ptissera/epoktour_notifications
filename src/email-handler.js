@@ -37,17 +37,6 @@ Merci !
 }
 
 const generateMessage48Hours = (metaData) => {
-
-  if (metaData.bookings.length === 0) {
-    return `
-    Bonjour,
-
-    Il n'y a pas encore de réservations !!!!!!
-
-Bien cordialement
-    `
-  }
-
   let adults = 0;
   metaData.bookings.forEach(booking => {
     if (!!booking['tour-adult'] && parseInt(booking['tour-adult']) > 0) {
