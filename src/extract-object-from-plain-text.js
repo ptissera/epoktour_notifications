@@ -149,8 +149,8 @@ const extract = (text) => {
         result.day.includes(date48.weekday) &&
         result.month.includes(date48.month) &&
         result.year.includes(date48.year) &&
-        (!!result.excludeDate ||
-          (result.excludeDate && !result.excludeDate.includes(date48.date)))) ||
+        ( (result.excludeDate == null || result.excludeDate === 0) ||
+          (result.excludeDate != null && !result.excludeDate.includes(date48.date)))) ||
       result.extraDate.includes(date48.date)
     ) {
       date48.startTime.push(...result.startTime);
