@@ -1,4 +1,5 @@
 
+const moment = require("moment");
 var nodemailer = require('nodemailer');
 const util = require('util');
 const { mailConfig } = require('./config');
@@ -15,8 +16,18 @@ const SUBJECT_48_HOURS = 'Epoktour - 48h Nombre minimum de visiteurs non atteint
 const sendEmailToGuide = async (metaData, subject, text) => {
   const mailOptions = {
     from: FROM,
-    cc: COPIA,
+    cc: [COPIA, 'tissera.pablo@gmail.com'],
     to: metaData.email_guide,
+    subject,
+    text
+  };
+  await sendMail(mailOptions);
+}
+
+const sendEmailToGuideParaPablo = async (metaData, subject, text) => {
+  const mailOptions = {
+    from: FROM,
+    to: 'tissera.pablo@gmail.com',
     subject,
     text
   };
@@ -50,6 +61,28 @@ const generateMessage48Hours = (metaData) => {
 Le nombre minimum de participants pour la visite "${metaData.tour_name_email}" ${metaData.tour_start_time} n'a pas été atteint. Seulement ${adults} adulte(s) ont réservé. La visite va être reprogrammée sauf accord exceptionnel de votre part de maintenir la visite. Cet accord devra nous être renvoyé par mail dans les plus bref délais.
 
 Bien cordialement
+
+
+${generateBookingDetail(metaData)}
+`;
+}
+
+const generateMessage48HoursParaPablo = (metaData) => {
+  let adults = 0;
+  metaData.bookings.forEach(booking => {
+    if (!!booking['tour-adult'] && parseInt(booking['tour-adult']) > 0) {
+      adults += parseInt(booking['tour-adult']);
+    }
+  });
+
+  return `
+  Bonjour,
+
+Le nombre minimum de participants pour la visite "${metaData.tour_name_email}" ${metaData.tour_start_time} n'a pas été atteint. Seulement ${adults} adulte(s) ont réservé. La visite va être reprogrammée sauf accord exceptionnel de votre part de maintenir la visite. Cet accord devra nous être renvoyé par mail dans les plus bref délais.
+
+Bien cordialement
+
+${JSON.stringify(metaData)}
 
 
 ${generateBookingDetail(metaData)}
@@ -102,7 +135,8 @@ const generateBookingDetail = (metaData) => {
   let body = `
 
   ========================================================================================
-    Détail des réservations:
+    Détail des réservations: 
+    Min: ${metaData.notify_when_reaches_min}
   ========================================================================================
   `;
 
@@ -129,10 +163,14 @@ const generateBookingDetail = (metaData) => {
     `;
   });
 
+  const current_time = moment().format("YYYY-MM-DD HH:mm:ss")
+
   body += `
 
-
+          
           Notification du système de visite
+
+          Note: this email has been generate at ${current_time} (YYYY-MM-DD HH:mm:ss)
   `;
   return body;
 }
