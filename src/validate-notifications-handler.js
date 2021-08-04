@@ -1,12 +1,13 @@
 "use strict";
 
 const ONE_HOUR = 3600000;
-const MIN_1_HOUR = 3240000 + 3600000;
-const MAX_1_HOUR = 3960000 + 3600000;
-const MIN_24_HOUR = 86040000;
-const MAX_24_HOUR = 86760000;
-const MIN_48_HOUR = 172440000;
-const MAX_48_HOUR = 173160000;
+const TWO_HOURS = ONE_HOUR * 2;
+const MIN_1_HOUR = 3240000 + TWO_HOURS;
+const MAX_1_HOUR = 3960000 + TWO_HOURS;
+const MIN_24_HOUR = 86040000 + TWO_HOURS;
+const MAX_24_HOUR = 86760000 + TWO_HOURS;
+const MIN_48_HOUR = 172440000 + TWO_HOURS;
+const MAX_48_HOUR = 173160000 + TWO_HOURS;
 
 const checkMinBookingReached = (metaData) => {
   const keys = Object.keys(metaData);
